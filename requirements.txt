@@ -1,0 +1,5 @@
+agno
+exa-py
+python-dotenv
+requests
+beautifulsoup4
