@@ -1,69 +1,86 @@
+import sys
+import os
 import json
-import re
-from agno.tools.base import Tool
+from dotenv import load_dotenv
+from agents.ident_expdb_agent import IdentExpDBAgent
+from models.openai_agent import OpenAIAgent
 
+def normalize_success_field(value) -> bool:
+	"""
+	Normalize different representations of success into a boolean.
+	"""
+	if isinstance(value, bool):
+		return value
+	if isinstance(value, str):
+		return value.strip().lower() == "true"
+	return False
 
-class IdentifierTool(Tool):
-	def __init__(self):
-		super().__init__(
-			name="identifier",
-			description="Extracts and formats relevant CVE information from JSON for PoC identification"
-		)
+def save_result(txt_path: str, llm_response):
+	"""
+	Standardize and save LLM response to JSON with only "success" and "PoC" fields.
 
-	def call(self, cve_file_path: str) -> str:
-		"""
-		Load and extract essential CVE fields to help LLM understand and identify a PoC.
+	Args:
+		txt_path (str): Path to input txt file (e.g., CVE-xxxx_exploitdb.txt)
+		llm_response (str or dict): Raw output from the model, or parsed dict
+	"""
+	output_path = txt_path.replace(".txt", "_poc.json")
 
-		Args:
-			cve_file_path (str): Path to CVE JSON file from NVD.
+	try:
+		# If response is a string, try to parse it
+		if isinstance(llm_response, str):
+			parsed = json.loads(llm_response)
+		elif isinstance(llm_response, dict):
+			parsed = llm_response
+		else:
+			raise ValueError("Unsupported llm_response type")
 
-		Returns:
-			str: Human-readable JSON-like string used as LLM input.
-		"""
-		try:
-			with open(cve_file_path, "r", encoding="utf-8") as f:
-				data = json.load(f)
+		poc = parsed.get("PoC", "")
+		if isinstance(poc, list):
+			poc = next((x for x in poc if isinstance(x, str) and x.strip()), "")
 
-			cve_item = data["vulnerabilities"][0]["cve"]
-			cve_id = cve_item.get("id", "")
-			description = cve_item.get("descriptions", [{}])[0].get("value", "")
-			references = [r["url"] for r in cve_item.get("references", [])]
+		success_raw = parsed.get("success", False)
+		success = normalize_success_field(success_raw) and bool(poc.strip())
 
-			cvss_v3 = cve_item.get("metrics", {}).get("cvssMetricV31", [])
-			cvss_summary = []
-			for m in cvss_v3:
-				d = m.get("cvssData", {})
-				cvss_summary.append({
-					"source": m.get("source", ""),
-					"baseScore": d.get("baseScore", ""),
-					"vectorString": d.get("vectorString", ""),
-					"severity": d.get("baseSeverity", "")
-				})
+		result = {
+			"success": success,
+			"PoC": poc.strip() if success else ""
+		}
 
-			weaknesses = [w["description"][0]["value"] for w in cve_item.get("weaknesses", []) if "description" in w]
+	except Exception:
+		result = {
+			"success": False,
+			"PoC": ""
+		}
 
-			result = {
-				"CVE ID": cve_id,
-				"Description": description,
-				"CVSS v3 Summary": cvss_summary,
-				"Weaknesses": weaknesses,
-				"References": references
-			}
+	with open(output_path, "w", encoding="utf-8") as f:
+		json.dump(result, f, indent=2)
 
-			return self._clean_json_block(json.dumps(result, indent=2))
+	print(f"[✓] Result saved to: {output_path}")
 
-		except Exception as e:
-			return f"[ERROR] Failed to parse CVE file: {e}"
+def main():
+	load_dotenv()
 
-	def _clean_json_block(self, text: str) -> str:
-		"""
-		Ensure the returned JSON is not wrapped in markdown formatting.
+	if len(sys.argv) != 2:
+		print("Usage: python run_ident_expdb.py <exploitdb_txt_file>")
+		return
 
-		Args:
-			text (str): Raw text possibly wrapped in markdown
+	txt_path = sys.argv[1]
+	if not os.path.exists(txt_path):
+		print(f"[✗] File not found: {txt_path}")
+		return
 
-		Returns:
-			str: Cleaned JSON string
-		"""
-		match = re.search(r"```json\s*(\{.*?\})\s*```", text, re.DOTALL)
-		return match.group(1).strip() if match else text.strip()
+	openai_api_key = os.getenv("OPENAI_API_KEY")
+	model = OpenAIAgent(
+		api_key=openai_api_key,
+		base_url="https://api.openai.com/v1",
+		model_name="gpt-4o"
+	)
+
+	agent = IdentExpDBAgent(model)
+	llm_response = agent.run(txt_path)
+
+	print("\n[LLM Response]:\n", llm_response)
+	save_result(txt_path, llm_response)
+
+if __name__ == "__main__":
+	main()
