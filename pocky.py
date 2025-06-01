@@ -6,9 +6,8 @@ import subprocess
 from openai import OpenAI
 from exa_py import Exa
 from dotenv import load_dotenv
-from searching.models.openai_agent import OpenAIAgent
-from validation.ValidationAgent import ValidationAgent
-from validation.AttackIntentAgent import AttackIntentAgent
+from validation.validation_agent import ValidationAgent
+from validation.attack_intent_agent import AttackIntentAgent
 
 # === CONFIGURATION ===
 load_dotenv()
