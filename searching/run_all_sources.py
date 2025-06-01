@@ -22,43 +22,43 @@ def main():
 		return
 
 	cve_id = sys.argv[1]
-	cve_json = f"{cve_id}.json"
-	result_path = "init_result.txt"
+	cve_json_path = f"./search_output/{cve_id}.json"
+	result_path = "./search_output/init_result.txt"
 
 	# Step 1: Get CVE JSON
-	subprocess.run(f"python3.9 cveinfo.py {cve_id}", shell=True)
+	subprocess.run(f"python ./searching/cveinfo.py {cve_id}", shell=True)
 
 	# Step 2: Run Identifier
-	id_json = f"{cve_id}_result.json"
-	success, poc = run_and_check_output(f"python3.9 run_identifier.py {cve_json}", id_json)
+	id_json_path = f"./search_output/{cve_id}_result.json"
+	success, poc = run_and_check_output(f"python ./searching/run_identifier.py {cve_json_path}", id_json_path)
 	if success:
 		with open(result_path, "w") as f:
 			f.write(poc)
 		return
 
 	# Step 3: Exploit-DB retrieval
-	exploit_txt = f"{cve_id}_exploitdb.txt"
-	subprocess.run(f"python3.9 run_exploit_db.py {cve_json}", shell=True)
+	exploit_txt_path = f"./search_output/{cve_id}_exploitdb.txt"
+	subprocess.run(f"python ./searching/run_exploit_db.py {cve_json_path}", shell=True)
 
 	# Step 4: Analyze Exploit-DB
-	exploit_json = f"{cve_id}_exploitdb_poc.json"
-	success, poc = run_and_check_output(f"python3.9 run_ident_expdb.py {exploit_txt}", exploit_json)
+	exploit_json_path = f"./search_output/{cve_id}_exploitdb_poc.json"
+	success, poc = run_and_check_output(f"python ./searching/run_ident_expdb.py {exploit_txt_path}", exploit_json_path)
 	if success:
 		with open(result_path, "w") as f:
 			f.write(poc)
 		return
 
 	# Step 5: PoC-in-GitHub
-	github_json = f"{cve_id}_pocgithub.json"
-	success, poc = run_and_check_output(f"python3.9 run_poc_in_github.py {cve_json}", github_json)
+	github_json_path = f"./search_output/{cve_id}_pocgithub.json"
+	success, poc = run_and_check_output(f"python ./searching/run_poc_in_github.py {cve_json_path}", github_json_path)
 	if success:
 		with open(result_path, "w") as f:
 			f.write(poc)
 		return
 
 	# Step 6: Google Search
-	google_json = f"{cve_id}_google_result.json"
-	success, poc = run_and_check_output(f"python3.9 run_google_search.py {cve_json}", google_json)
+	google_json_path = f"./search_output/{cve_id}_google_result.json"
+	success, poc = run_and_check_output(f"python ./searching/run_google_search.py {cve_json_path}", google_json_path)
 	with open(result_path, "w") as f:
 		f.write(poc if success else "Failed to gather a PoC.")
 

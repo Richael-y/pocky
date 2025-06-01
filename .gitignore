@@ -1,2 +1,5 @@
 .env
 .DS_Store
+search_output/*
+logs/*
+results/*

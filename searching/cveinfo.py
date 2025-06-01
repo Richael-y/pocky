@@ -6,7 +6,7 @@ import json
 import requests
 
 API_KEY = "54dcc290-72f5-4333-8c84-3aba38e23e1f"  # NVD API Key
-DOC_DIR = "."
+DOC_DIR = "./search_output/"
 os.makedirs(DOC_DIR, exist_ok=True)
 
 headers = {
@@ -46,7 +46,7 @@ def save_to_file(cve_id, data):
 
 def main():
 	if len(sys.argv) != 2:
-		print("Usage: python3 script.py <CVE-ID>")
+		print("Usage: python script.py <CVE-ID>")
 		sys.exit(1)
 
 	cve_id = sys.argv[1].strip().upper()

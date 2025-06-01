@@ -13,7 +13,7 @@ A lightweight, web-scale agent that helps you find, filter, and fetch real-world
 1. Clone the repository:
 ```bash
 git clone [repository-url]
-cd poc-collector
+cd pocky
 ```
 
 2. Install dependencies:
@@ -25,12 +25,14 @@ pip install -r requirements.txt
 Create a `.env` file and add the following content:
 ```
 EXA_API_KEY=your_exa_api_key
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_BASE_URL=your_api_base_url
 ```
 
 ## Usage
 
 ```bash
-python main.py CVE-2023-1234
+python pocky.py CVE-2023-4450
 ```
 
 ## Dependencies
@@ -39,7 +41,17 @@ python main.py CVE-2023-1234
 - exa-py: For advanced web searching
 - python-dotenv: Environment variable management
 - requests: HTTP requests
-- beautifulsoup4: HTML parsing
+- flask: for WebUI
+
+## PoCky Web UI
+
+To start the web UI, run:
+
+```bash
+python pocky-webui.py
+```
+
+The server will start at http://127.0.0.1:5000.
 
 ## Notes
 

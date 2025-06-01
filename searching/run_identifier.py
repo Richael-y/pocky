@@ -50,7 +50,6 @@ def main():
 	# Init GPT-4o agent
 	model = OpenAIAgent(
 		api_key=openai_api_key, 
-		base_url="https://api.openai.com/v1",
 		model_name="gpt-4o"
 	)
 

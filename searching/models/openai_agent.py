@@ -1,11 +1,12 @@
 import openai
+import os
 
 class OpenAIAgent:
 	"""
 	A simple wrapper around the OpenAI Chat Completion API for use in Agno-style agents.
 	"""
 
-	def __init__(self, api_key: str, base_url: str = "https://api.openai.com/v1", model_name: str = "gpt-4o"):
+	def __init__(self, api_key: str = os.getenv("OPENAI_API_KEY"), base_url: str = os.getenv("OPENAI_BASE_URL"), model_name: str = "gpt-4o"):
 		"""
 		Initialize the OpenAI agent.
 

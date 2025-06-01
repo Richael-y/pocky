@@ -57,7 +57,7 @@ def save_result(cve_id, urls):
 		"success": bool(urls),
 		"PoC": "\n".join(urls) if urls else ""
 	}
-	out_path = f"{cve_id}_pocgithub.json"
+	out_path = f"./search_output/{cve_id}_pocgithub.json"
 	with open(out_path, "w", encoding="utf-8") as f:
 		json.dump(output, f, indent=2)
 	print(f"[✓] Result saved to: {out_path}")
@@ -65,7 +65,7 @@ def save_result(cve_id, urls):
 
 def main():
 	if len(sys.argv) != 2:
-		print("Usage: python3 run_poc_in_github.py <cve_json_file>")
+		print("Usage: python run_poc_in_github.py <cve_json_file>")
 		sys.exit(1)
 
 	cve_path = sys.argv[1]
