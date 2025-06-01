@@ -27,6 +27,7 @@ Create a `.env` file and add the following content:
 EXA_API_KEY=your_exa_api_key
 OPENAI_API_KEY=your_openai_api_key
 OPENAI_BASE_URL=your_api_base_url
+NVD_API_KEY=your_NVD_api_key
 ```
 
 ## Usage

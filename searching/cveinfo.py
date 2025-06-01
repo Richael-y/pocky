@@ -5,7 +5,7 @@ import sys
 import json
 import requests
 
-API_KEY = "54dcc290-72f5-4333-8c84-3aba38e23e1f"  # NVD API Key
+API_KEY = os.getenv("NVD_API_KEY")  # NVD API Key
 DOC_DIR = "./search_output/"
 os.makedirs(DOC_DIR, exist_ok=True)
 
